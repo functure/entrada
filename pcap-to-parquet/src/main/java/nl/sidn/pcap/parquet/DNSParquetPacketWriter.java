@@ -57,6 +57,13 @@ import org.kitesdk.data.PartitionStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+
+
 public class DNSParquetPacketWriter extends AbstractParquetPacketWriter {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DNSParquetPacketWriter.class);
@@ -81,9 +88,29 @@ public class DNSParquetPacketWriter extends AbstractParquetPacketWriter {
 	private GoogleResolverCheck googleCheck = new GoogleResolverCheck();
 	private OpenDNSResolverCheck openDNSCheck = new OpenDNSResolverCheck();
 	
+
+	
 	public DNSParquetPacketWriter(String repoName, String schema) {
 		super(repoName,schema);
 		metricManager = MetricManager.getInstance();
+
+	}
+
+
+	public boolean checkDomainFilter(PacketCombination combo){
+	    String normalizedQname =  q == null? "": filter(q.getqName());
+	    normalizedQname = StringUtils.lowerCase(normalizedQname);	    
+	    Domaininfo domaininfo = NameUtil.getDomain(normalizedQname, Settings.getTldSuffixes());
+	    filterDomainList = Settings.getFilterDomainList()
+	    if( filterDomainList.contains(domaininfo.name)){
+		LOGGER.debug("DOMAINFILTER: DO NOT WRITE " + domaininfo.name);	
+	    	return false;
+	    }
+	    else{
+		LOGGER.debug("DOMAINFILTER: WRITE " + domaininfo.name);
+		return true;	
+	    }
+		
 	}
 
 	private Question lookupQuestion(Message reqMessage, Message respMessage){
@@ -122,7 +149,7 @@ public class DNSParquetPacketWriter extends AbstractParquetPacketWriter {
 	 */
 	@Override
 	public void write(PacketCombination combo) {
-
+		
 		GenericRecordBuilder builder = newBuilder();
 		
 		packetCounter++;

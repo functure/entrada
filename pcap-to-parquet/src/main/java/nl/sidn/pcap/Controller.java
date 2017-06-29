@@ -40,8 +40,11 @@ import nl.sidn.pcap.support.RequestKey;
 import nl.sidn.pcap.util.Settings;
 import nl.sidn.stats.MetricManager;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+
 
 public class Controller {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Controller.class);
@@ -66,7 +69,11 @@ public class Controller {
 	int udp = 0;
 	int tcp = 0;
 	int icmp = 0;
-	
+
+	int dnsWritten = 0;
+	int dnsFiltered = 0;
+
+
 	public Controller(){
 		Settings setting = Settings.getInstance();
 		/* create a pcap loader, reading and decoding pcap files is done
@@ -84,8 +91,11 @@ public class Controller {
 		dnsWriter.open();
 		icmpWriter = new ICMPParquetPacketWriter("icmpdata","icmp-packet.avsc");
 		icmpWriter.open();
+		
+
 	}
-	
+
+
 	public void startLoaderThread(String inputDir, String stateDir, String outputDir){
 		LOGGER.info("Start LoaderThread");
 		executor = Executors.newFixedThreadPool(1, new NamedThreadFactory("PCAPLoader-Thread"));
@@ -99,7 +109,7 @@ public class Controller {
 			//read packets from the shared queue
 			p = nextPacket();
 			
-			if(p != null && p != PacketCombination.NULL){
+			if(p != null && p != PacketCombination.NULL ){
 				int proto = lookupProtocol(p);
 				if(proto == PcapReader.PROTOCOL_TCP){
 					tcp++; 
@@ -121,6 +131,8 @@ public class Controller {
 		metricManager.send(MetricManager.METRIC_ICMP_COUNT, icmpTotalCounter);
 		metricManager.send(MetricManager.METRIC_IMPORT_TCP_COUNT, tcp);
 		metricManager.send(MetricManager.METRIC_IMPORT_UDP_COUNT, udp);
+		metricManager.send(MetricManager.METRIC_WRITTEN_DNS_COUNT, dnsWritten);
+		metricManager.send(MetricManager.METRIC_FILTERED_DNS_COUNT, dnsFiltered);
 		dnsWriter.writeMetrics();
 		icmpWriter.writeMetrics();
 	}
@@ -153,15 +165,21 @@ public class Controller {
 	
 	
 	private void writeDns(PacketCombination p){
-		dnsWriter.write(p);
-		counter++;
-		totalCounter++;
-		if(counter >= parquetMaxPackets){
-			dnsWriter.close();
-			//create new writer
-			dnsWriter.open();
-			//reset counter
-			counter = 0;
+		writeOK = dnsWriter.checkFilterDomainList()
+		if(writeOK){
+			dnsWriter.write(p);
+			counter++;
+			totalCounter++;
+			dnsWritten++;
+			if(counter >= parquetMaxPackets){
+				dnsWriter.close();
+				//create new writer
+				dnsWriter.open();
+				//reset counter
+				counter = 0;
+			}
+		else{
+			dnsFiltered++;
 		}
 	}
 	

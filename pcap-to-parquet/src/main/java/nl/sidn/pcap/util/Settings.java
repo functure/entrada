@@ -65,7 +65,8 @@ public class Settings {
 	public static String TLD_SUFFIX = "tld.suffix";
 	public static String BUFFER_PCAP_READER = "buffer.pcap.reader";
 	
-	
+	public static String FILTER_FILE_LOCATION = "filter.location"	
+
 	private static Properties props = null;
 	private static Settings _instance = null;
 	
@@ -73,6 +74,8 @@ public class Settings {
 	private ServerInfo serverInfo = null;
 	
 	private static List<DomainParent> tldSuffixes = new ArrayList<>();
+	
+	private List<String> filterDomainList;
 	
 	private Settings(String path){
 		init(path);
@@ -110,7 +113,30 @@ public class Settings {
 		}
 		//do other init work
 		createTldSuffixes();
+		filterDomainList = readFilterFile();
 	  }
+
+	private List<String> readFilterFile(){
+		String fileName = props.getProperty(FILTER_FILE_LOCATION)
+		List<String> filterList;
+		if( fileName != null ){
+			try:
+				URI uri = this.getClass().getResource(fileName).toURI();
+				filterList = Files.readAllLines(Paths.get(uri), Charset.defaultCharset());
+				LOGGER.info("DOMAINFILTER: Read " + filterList.size() + " domains");
+			catch(Exception e) {
+				filterList = new List<String>();
+				LOGGER.error("DOMAINFILTER: Could not read filter file", e);
+			}
+		}
+		else{
+			filterList = new List<String>();
+			LOGGER.info("DOMAINFILTER: Filter file location is not given in settings");
+		}
+
+
+		return filterList;
+	}
 	
 	public String getSetting(String key){
 		return props.getProperty(key);
@@ -234,6 +260,9 @@ public class Settings {
 		return tldSuffixes;
 	}
 	
+	public static List<String> getFilterDomainList() {
+		return filterDomainList;
+	}
 	private void debug(){
 		LOGGER.info("************** entrada-setting.properties ******************");
 		for( String pn : props.stringPropertyNames()){

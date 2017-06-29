@@ -48,6 +48,9 @@ public class MetricManager {
 	public static String METRIC_IMPORT_DNS_OPCODE = ".dns.request.opcode";
 	public static String METRIC_IMPORT_DNS_NO_RESPONSE_COUNT = ".dns.noreresponse.count";
 	
+	public static String METRIC_WRITTEN_DNS_COUNT = ".dns.written.count";
+	public static String METRIC_FILTERED_DNS_COUNT = ".dns.filtered.count";
+	
 	//layer 4 stats
 	public static String METRIC_IMPORT_DNS_TCPSTREAM_COUNT = ".dns.tcp.session.count";
 	public static String METRIC_IMPORT_TCP_COUNT = ".tcp.packet.count";
