@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 
 # ENTRADA, a big data platform for network data analytics
-# 
+#
 # Copyright (C) 2016 SIDN [https://www.sidn.nl]
-#  
+#
 # This file is part of ENTRADA.
-# 
+#
 # ENTRADA is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # ENTRADA is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-#  
+#
 # You should have received a copy of the GNU General Public License
 # along with ENTRADA.  If not, see [<http://www.gnu.org/licenses/].
 
@@ -36,7 +36,7 @@ export TMP_DIR="$ENTRADA_HOME/tmp/"
 export CONFIG_FILE="$ENTRADA_HOME/scripts/config/entrada-settings.properties"
 
 #Impala deamon hostname for impala-shell to connect to
-export IMPALA_NODE=""
+export IMPALA_NODE="192.168.105.33"
 
 #hdfs locations for storing data
 export HDFS_HOME="/user/hive/entrada"
@@ -47,7 +47,7 @@ export DATA_RSYNC_DIR="/home/entrada/captures"
 export DATA_DIR="/home/entrada/pcap"
 #number of days to keep old pcap files
 export PCAP_DAYS_TO_KEEP=10
-#remove input pcap files from original location after they are processed 
+#remove input pcap files from original location after they are processed
 #if you are not using rsync to remove them then set this option to true.
 export DELETE_INPUT_PCAP_FILES=false
 
