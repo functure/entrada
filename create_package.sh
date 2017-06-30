@@ -9,7 +9,8 @@ mvn install
 cd ../pcaplib4java
 mvn install
 cd ../pcap-to-parquet
-mvn install
+mvn install -DskipTests
+cd ..
 
 mkdir $BASE_DIR
 cp pcap-to-parquet/target/pcap-to-parquet-$VERSION-jar-with-dependencies.jar $BASE_DIR

@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 import nl.sidn.dnslib.message.Header;
 import nl.sidn.dnslib.message.Message;
@@ -57,11 +58,7 @@ import org.kitesdk.data.PartitionStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
+
 
 
 public class DNSParquetPacketWriter extends AbstractParquetPacketWriter {
@@ -97,11 +94,15 @@ public class DNSParquetPacketWriter extends AbstractParquetPacketWriter {
 	}
 
 
-	public boolean checkDomainFilter(PacketCombination combo){
+	public boolean checkFilterDomainList(PacketCombination combo){
+	    Message requestMessage = combo.getRequestMessage();
+	    Message respMessage = combo.getResponseMessage();
+	
+	    Question q = lookupQuestion(requestMessage, respMessage);
 	    String normalizedQname =  q == null? "": filter(q.getqName());
 	    normalizedQname = StringUtils.lowerCase(normalizedQname);	    
 	    Domaininfo domaininfo = NameUtil.getDomain(normalizedQname, Settings.getTldSuffixes());
-	    filterDomainList = Settings.getFilterDomainList()
+	    List<String> filterDomainList = Settings.getFilterDomainList();
 	    if( filterDomainList.contains(domaininfo.name)){
 		LOGGER.debug("DOMAINFILTER: DO NOT WRITE " + domaininfo.name);	
 	    	return false;

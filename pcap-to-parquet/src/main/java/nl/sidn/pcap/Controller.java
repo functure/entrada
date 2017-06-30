@@ -165,7 +165,7 @@ public class Controller {
 	
 	
 	private void writeDns(PacketCombination p){
-		writeOK = dnsWriter.checkFilterDomainList()
+		boolean writeOK = dnsWriter.checkFilterDomainList(p);
 		if(writeOK){
 			dnsWriter.write(p);
 			counter++;
@@ -178,6 +178,7 @@ public class Controller {
 				//reset counter
 				counter = 0;
 			}
+		}
 		else{
 			dnsFiltered++;
 		}

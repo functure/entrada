@@ -34,6 +34,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
+import java.util.List;
+
 /**
  * Utility class for reading the entrada config file and making the
  * key-value pairs available.
@@ -65,7 +73,7 @@ public class Settings {
 	public static String TLD_SUFFIX = "tld.suffix";
 	public static String BUFFER_PCAP_READER = "buffer.pcap.reader";
 	
-	public static String FILTER_FILE_LOCATION = "filter.location"	
+	public static String FILTER_FILE_LOCATION = "filter.location";	
 
 	private static Properties props = null;
 	private static Settings _instance = null;
@@ -75,7 +83,7 @@ public class Settings {
 	
 	private static List<DomainParent> tldSuffixes = new ArrayList<>();
 	
-	private List<String> filterDomainList;
+	private static List<String> filterDomainList;
 	
 	private Settings(String path){
 		init(path);
@@ -113,29 +121,30 @@ public class Settings {
 		}
 		//do other init work
 		createTldSuffixes();
-		filterDomainList = readFilterFile();
+		readFilterFile();
 	  }
 
-	private List<String> readFilterFile(){
-		String fileName = props.getProperty(FILTER_FILE_LOCATION)
+	private static void readFilterFile(){
+		String fileName = props.getProperty(FILTER_FILE_LOCATION);
 		List<String> filterList;
 		if( fileName != null ){
-			try:
-				URI uri = this.getClass().getResource(fileName).toURI();
-				filterList = Files.readAllLines(Paths.get(uri), Charset.defaultCharset());
+			try{
+				Path filePath = Paths.get(fileName);
+				filterList = Files.readAllLines(filePath, Charset.defaultCharset());
 				LOGGER.info("DOMAINFILTER: Read " + filterList.size() + " domains");
+			}
 			catch(Exception e) {
-				filterList = new List<String>();
-				LOGGER.error("DOMAINFILTER: Could not read filter file", e);
+				filterList = new ArrayList<String>();
+				LOGGER.error("DOMAINFILTER: Could not read filter file");
 			}
 		}
 		else{
-			filterList = new List<String>();
+			filterList = new ArrayList<String>();
 			LOGGER.info("DOMAINFILTER: Filter file location is not given in settings");
 		}
 
 
-		return filterList;
+		filterDomainList = filterList;
 	}
 	
 	public String getSetting(String key){
